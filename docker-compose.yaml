@@ -1,0 +1,43 @@
+version: '3'
+services:
+  torrent:
+    image: torrent
+    build: torrent
+    volumes:
+      - ./torrent/data/download:/data/download
+      - ./torrent/data/incomplete:/data/incomplete
+      - ./torrent/data/watch:/data/watch
+    ports:
+      # hostPort:containerPort
+      - 9091:9091
+  samba:
+    image: samba
+    build: samba
+    volumes:
+      - ./torrent/data/download:/data/download
+      - ./torrent/data/watch:/data/watch
+    ports:
+      - 139:139
+      - 445:445
+  ftp:
+    image: ftp
+    build: ftp
+    volumes:
+      - ./torrent/data/download:/data/download
+      - ./torrent/data/watch:/data/watch
+    ports:
+      - "21:21"
+      - "21000-21010:21000-21010"
+  plex:
+    container_name: plex
+    image: plexinc/pms-docker
+    restart: unless-stopped
+    environment:
+      - TZ=Europe/Minsk
+      - PLEX_CLAIM=claim-swuc6FrSvtH8zxzvADYC
+      - ADVERTISE_IP=http://192.168.1.109:32400/
+    network_mode: host
+    volumes:
+      - ./plex/config:/config
+      - ./plex/transcode:/transcode
+      - ./torrent/data/download:/data
